@@ -18,7 +18,7 @@ fn main() {
     let mut x = Vec::new();
     let mut y = Vec::new();
 
-    for i in 1..fft.len() / 2 {
+    for i in 1..fft.len() {
         x.push(i);
         y.push(*fft.get(i).unwrap() as f32);
     }

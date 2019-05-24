@@ -8,4 +8,4 @@ Represents source audiofile as PCM and Beat data
 * `pcm_json` shows PCM data as JSON
 * `fft_gnu` shows FFT data on the GNUPlot
 * `od_gnu` shows peak data on the GNUPlot (TODO)
-* `od_daemon` shows daemon (TODO)
+* `od_daemon` starts daemon (TODO)

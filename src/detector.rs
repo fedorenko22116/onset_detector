@@ -1,6 +1,7 @@
 use rustfft::num_complex::Complex;
 use rustfft::{FFTplanner, FFTnum, num_traits::Float};
 use rustfft::num_traits::Zero;
+use std::slice::Chunks;
 
 pub trait Detector {
     fn fft(&self) -> Self;
@@ -17,7 +18,10 @@ impl<T> Detector for Vec<T>
         let fft = planner.plan_fft(input.len());
         fft.process(&mut input, &mut output);
 
-        output.iter().map(|c| (c.im.powi(2) + c.re.powi(2).sqrt()) as T).collect()
+        output.iter()
+            .map(|c| (c.im.powi(2) + c.re.powi(2).sqrt()) as T)
+            .collect::<Vec<T>>()[..output.len() / 2]
+            .to_vec()
     }
 
     fn peak(&self) -> Self {
