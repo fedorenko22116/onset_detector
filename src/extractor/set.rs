@@ -36,14 +36,28 @@ impl FrameSet {
             let channels = self.data[i * (self.data.len() / pos)].to_owned().samples;
             let mut sample = 0.;
 
+            /*let mut data: Vec<f64> = Default::default();
+
+            for channel in channels.iter() {
+                for (j, d) in channel.iter().enumerate() {
+                    if let Some(val) = data.get(j) {
+                        data[j] += d.to_f64();
+                    } else {
+                        data.push(d.to_f64());
+                    }
+                }
+            }
+
+            for d in data.iter() {
+                res.push(*d);
+            }*/
+
             for channel in channels.iter() {
                 sample += channel[0].to_f64()
             }
 
             res.push(sample / channels.len() as f64);
         }
-
-        res.push(0.0);
 
         res
     }
