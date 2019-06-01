@@ -7,6 +7,7 @@ use onset_detection::utils::get_path;
 use onset_detection::detector::Detector;
 use jsonrpc_core::{IoHandler, Value, Params, ErrorCode};
 use jsonrpc_http_server::{ServerBuilder};
+use std::time::Duration;
 
 fn main() {
     let http = get_path();
@@ -24,7 +25,7 @@ fn main() {
         let path = Path::new(&name);
         let music = Music::from_file(&path).unwrap();
 
-        let samples = music.frames.extract();
+        let samples = music.frames.per(&Duration::from_secs(100));
         let res = samples.fft().beats(&50);
 
         Ok(Value::String(serde_json::to_string(&res).unwrap()))
@@ -41,7 +42,7 @@ fn main() {
         let path = Path::new(&name);
         let music = Music::from_file(&path).unwrap();
 
-        let samples = music.frames.extract();
+        let samples = music.frames.per(&Duration::from_secs(100));
 
         Ok(Value::String(serde_json::to_string(&samples).unwrap()))
     });
@@ -57,7 +58,7 @@ fn main() {
         let path = Path::new(&name);
         let music = Music::from_file(&path).unwrap();
 
-        let samples = music.frames.extract();
+        let samples = music.frames.per(&Duration::from_secs(100));
         let res = samples.fft();
 
         Ok(Value::String(serde_json::to_string(&res).unwrap()))

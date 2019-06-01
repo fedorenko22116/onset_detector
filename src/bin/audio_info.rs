@@ -17,7 +17,8 @@ fn main() {
     let music = Music::from_file(&path)
         .expect("Error occured during parsing");
 
-    let samples = music.frames.per(&Duration::from_millis(1000));
+    let frames = music.frames;
+    let samples = frames.per(&Duration::from_secs(100));
 
     println!();
     println!("Music:");

@@ -25,20 +25,26 @@ impl FrameSet {
     }
 
     pub fn per(&self, duration: &Duration) -> Vec<f64> {
+        let samples = self.samples();
+        let duration = duration.as_millis() as usize;
+        let rate = self.data[0].sample_rate as usize;
+        let pos = samples.len() / (duration * rate / 1000) as usize;
         let mut res = Vec::new();
-        let frame_duration = self.duration.as_millis() as usize;
-
-        assert!(frame_duration >= self.data[0].duration.as_millis() as usize);
-
-        let pos = ((frame_duration as f64 / duration.as_millis() as f64) * self.data.len() as f64) as usize;
 
         for i in 0..pos {
-            let channels = self.data[i * (self.data.len() / pos)].to_owned().samples;
-            let mut sample = 0.;
+            res.push(samples[i * (duration * rate / 1000)]);
+        }
 
-            /*let mut data: Vec<f64> = Default::default();
+        res
+    }
 
-            for channel in channels.iter() {
+    fn samples(&self) -> Vec<f64> {
+        let mut res = Vec::new();
+
+        for frame in self.data.iter() {
+            let mut data: Vec<f64> = Default::default();
+
+            for channel in frame.to_owned().samples.iter() {
                 for (j, d) in channel.iter().enumerate() {
                     if let Some(val) = data.get(j) {
                         data[j] += d.to_f64();
@@ -50,19 +56,9 @@ impl FrameSet {
 
             for d in data.iter() {
                 res.push(*d);
-            }*/
-
-            for channel in channels.iter() {
-                sample += channel[0].to_f64()
             }
-
-            res.push(sample / channels.len() as f64);
         }
 
         res
-    }
-
-    pub fn extract(&self) -> Vec<f64> {
-        self.per(&self.data.get(0).unwrap().duration)
     }
 }

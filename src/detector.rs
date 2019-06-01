@@ -15,17 +15,28 @@ pub trait Detector {
 impl<T> Detector for Vec<T>
     where T: FFTnum + Float + Default + AddAssign + Debug + PartialEq {
     fn fft(&self) -> Self {
-        let mut input: Vec<Complex<T>> = self.iter().map(|n| Complex::from(n)).collect();
-        let mut output: Vec<Complex<T>> = vec![Complex::zero(); input.len()];
+        let mut res: Self = Default::default();
 
-        let mut planner = FFTplanner::new(false);
-        let fft = planner.plan_fft(input.len());
-        fft.process(&mut input, &mut output);
+        for chunk in self.chunks(1024) {
+            let mut input: Vec<Complex<T>> = vec![Complex::zero(); 1024];
+            let mut output: Vec<Complex<T>> = vec![Complex::zero(); 1024];
 
-        output.iter()
-            .map(|c| (c.im.powi(2) + c.re.powi(2).sqrt()) as T)
-            .collect::<Vec<T>>()[..output.len() / 2]
-            .to_vec()
+            chunk.iter().enumerate().for_each(|(i, val)| input[i] = Complex::from(val));
+
+            let mut planner = FFTplanner::new(false);
+            let fft = planner.plan_fft(1024);
+            fft.process(&mut input, &mut output);
+
+            res = [
+                res,
+                output.iter()
+                    .map(|c| (c.im.powi(2) + c.re.powi(2)).sqrt() as T)
+                    .collect::<Vec<T>>()[..output.len() / 2 + 1]
+                    .to_vec()
+            ].concat();
+        }
+
+        res
     }
 
     fn peak(&self, period: &usize) -> Self {

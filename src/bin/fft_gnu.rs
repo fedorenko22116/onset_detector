@@ -5,6 +5,7 @@ use onset_detection::extractor::Music;
 use gnuplot::{Figure, Graph, Caption, AxesCommon};
 use onset_detection::utils::get_path;
 use onset_detection::detector::Detector;
+use std::time::Duration;
 
 fn main() {
     let path_str = get_path();
@@ -12,7 +13,7 @@ fn main() {
     let music = Music::from_file(&path)
         .expect("Error occured during parsing");
 
-    let samples = music.frames.extract();
+    let samples = music.frames.per(&Duration::from_millis(1));
     let fft = samples.fft();
 
     let mut x = Vec::new();

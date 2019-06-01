@@ -12,7 +12,7 @@ fn main() {
     let music = Music::from_file(&path)
         .expect("Error occured during parsing");
 
-    let samples = music.frames.extract();
+    let samples = music.frames.per(&Duration::from_millis(1000));
 
     let mut x = Vec::new();
     let mut y = Vec::new();
