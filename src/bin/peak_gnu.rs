@@ -13,7 +13,7 @@ fn main() {
         .expect("Error occured during parsing");
 
     let samples = music.frames.samples();
-    let res = samples.fft().beats();
+    let res = samples.fft();
 
     let mut x = Vec::new();
     let mut y = Vec::new();
@@ -23,6 +23,16 @@ fn main() {
         y.push(*res.get(i).unwrap() as f64);
     }
 
+    let res = res.peak();
+
+    let mut x1 = Vec::new();
+    let mut y1 = Vec::new();
+
+    for i in 1..res.len() {
+        x1.push(i);
+        y1.push(*res.get(i).unwrap() as f64);
+    }
+
     let mut fg = Figure::new();
 
     fg.axes2d()
@@ -30,7 +40,8 @@ fn main() {
         .set_legend(Graph(0.5), Graph(0.5), &[], &[])
         .set_x_label("x - крок", &[])
         .set_y_label("y - діапазон", &[])
-        .lines(&x, &y, &[Caption(&music.name)]);
+        .lines(&x, &y, &[Caption(&music.name)])
+        .lines(&x1, &y1, &[Caption(&music.name)]);
 
     fg.show();
 }

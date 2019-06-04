@@ -4,7 +4,6 @@ extern crate textplots;
 use std::path::Path;
 use onset_detection::extractor::Music;
 use chrono::prelude::*;
-use std::time::Duration;
 use textplots::{Chart, Plot, Shape};
 use onset_detection::utils::get_path;
 
@@ -18,7 +17,7 @@ fn main() {
         .expect("Error occured during parsing");
 
     let frames = music.frames;
-    let samples = frames.per(&Duration::from_secs(100));
+    let samples = frames.samples();
 
     println!();
     println!("Music:");

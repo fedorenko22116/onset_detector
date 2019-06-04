@@ -38,7 +38,7 @@ impl FrameSet {
         res
     }
 
-    fn samples(&self) -> Vec<f64> {
+    pub fn samples(&self) -> Vec<f64> {
         let mut res = Vec::new();
 
         for frame in self.data.iter() {
@@ -46,7 +46,7 @@ impl FrameSet {
 
             for channel in frame.to_owned().samples.iter() {
                 for (j, d) in channel.iter().enumerate() {
-                    if let Some(val) = data.get(j) {
+                    if let Some(_val) = data.get(j) {
                         data[j] += d.to_f64();
                     } else {
                         data.push(d.to_f64());
