@@ -6,7 +6,14 @@ COPY ./ ./
 
 RUN cargo install --path . --all-features
 
-WORKDIR /var/storage
+ENV CURRENT_USER user
+
+RUN adduser --disabled-password ${CURRENT_USER} && \
+    usermod -a -G www-data ${CURRENT_USER}
+
+USER ${CURRENT_USER}
+
+WORKDIR /www/home/${CURRENT_USER}/storage
 
 CMD ["audio_daemon", "0.0.0.0:8095"]
 
