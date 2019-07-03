@@ -5,15 +5,29 @@ use onset_detection::extractor::Music;
 use gnuplot::{Figure, Graph, Caption, AxesCommon};
 use onset_detection::utils::get_path;
 use onset_detection::detector::Detector;
+use onset_detection::printtm;
 
 fn main() {
+    printtm!("Starting processing file");
+
     let path_str = get_path();
     let path = Path::new(&path_str);
     let music = Music::from_file(&path)
         .expect("Error occured during parsing");
 
+    printtm!("Parsing finished");
+
     let samples = music.frames.samples();
-    let res = samples.fft().beats();
+
+    printtm!("Got a samples");
+
+    let res = samples.fft();
+
+    printtm!("Got a fft");
+
+    let res = res.beats();
+
+    printtm!("Got a beats");
 
     let mut x = Vec::new();
     let mut y = Vec::new();

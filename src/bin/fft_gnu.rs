@@ -1,19 +1,29 @@
 extern crate gnuplot;
 
 use std::path::Path;
-use onset_detection::extractor::Music;
 use gnuplot::{Figure, Graph, Caption, AxesCommon};
+use onset_detection::extractor::Music;
 use onset_detection::utils::get_path;
 use onset_detection::detector::Detector;
+use onset_detection::printtm;
 
 fn main() {
+    printtm!("Starting processing file");
+
     let path_str = get_path();
     let path = Path::new(&path_str);
     let music = Music::from_file(&path)
         .expect("Error occured during parsing");
 
+    printtm!("Parsing finished");
+
     let samples = music.frames.samples();
+
+    printtm!("Got a samples");
+
     let fft = samples.fft();
+
+    printtm!("Got a fft");
 
     let mut x = Vec::new();
     let mut y = Vec::new();

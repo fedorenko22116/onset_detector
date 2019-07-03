@@ -27,7 +27,7 @@ impl<'a> Error for MusicError<'a> {
         }
     }
 
-    fn cause(&self) -> Option<&Error> {
+    fn cause(&self) -> Option<& dyn Error> {
         None
     }
 }

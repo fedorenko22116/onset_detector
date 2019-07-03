@@ -6,6 +6,9 @@ use num;
 use num::Float;
 use std::fmt::Debug;
 use std::cmp;
+use std::thread;
+use std::sync::{Mutex, Arc};
+use rayon::prelude::*;
 
 pub trait Detector {
     fn fft(&self) -> Self;
@@ -16,28 +19,26 @@ pub trait Detector {
 impl<T> Detector for Vec<T>
     where T: FFTnum + Float + Default + AddAssign + DivAssign + Debug + PartialEq {
     fn fft(&self) -> Self {
-        let mut res: Self = Default::default();
+        let chunks: Vec<&[T]> = self.chunks(1024).collect();
 
-        for chunk in self.chunks(1024) {
-            let mut input: Vec<Complex<T>> = vec![Complex::zero(); 1024];
-            let mut output: Vec<Complex<T>> = vec![Complex::zero(); 1024];
+        chunks.par_iter()
+            .map(|&chunk| {
+                let mut input: Vec<Complex<T>> = vec![Complex::zero(); 1024];
+                let mut output: Vec<Complex<T>> = vec![Complex::zero(); 1024];
 
-            chunk.iter().enumerate().for_each(|(i, val)| input[i] = Complex::from(val));
+                (*chunk).iter().enumerate().for_each(|(i, val)| input[i] = Complex::from(val));
 
-            let mut planner = FFTplanner::new(false);
-            let fft = planner.plan_fft(1024);
-            fft.process(&mut input, &mut output);
+                let mut planner = FFTplanner::new(false);
+                let fft = planner.plan_fft(1024);
+                fft.process(&mut input, &mut output);
 
-            res = [
-                res,
                 output.iter()
                     .map(|c| (c.im.powi(2) + c.re.powi(2)).sqrt() as T)
                     .collect::<Vec<T>>()[..output.len() / 2 + 1]
                     .to_vec()
-            ].concat();
-        }
-
-        res
+            })
+            .flatten()
+            .collect()
     }
 
     fn peak(&self) -> Self {
