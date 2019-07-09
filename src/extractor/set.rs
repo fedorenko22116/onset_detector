@@ -29,13 +29,11 @@ impl FrameSet {
         let duration = duration.as_millis() as usize;
         let rate = self.data[0].sample_rate as usize;
         let pos = samples.len() / (duration * rate / 1000) as usize;
-        let mut res = Vec::new();
 
-        for i in 0..pos {
-            res.push(samples[i * (duration * rate / 1000)]);
-        }
-
-        res
+        (0..pos)
+            .enumerate()
+            .map(|(i, _val)| samples[i * (duration * rate / 1000)])
+            .collect()
     }
 
     pub fn samples(&self) -> Vec<f64> {

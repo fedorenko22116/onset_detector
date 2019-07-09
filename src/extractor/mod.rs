@@ -38,8 +38,7 @@ impl Music {
             }
         }
 
-        let mut time = 0;
-        frames.iter().for_each(|f| time += f.duration.as_millis() as u64);
+        let time: u64 = frames.iter().map(|f| f.duration.as_millis() as u64).sum();
 
         let f_frame = match frames.get(0) {
             Some(f) => f,
