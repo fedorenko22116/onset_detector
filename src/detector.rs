@@ -6,8 +6,6 @@ use num;
 use num::Float;
 use std::fmt::Debug;
 use std::cmp;
-use std::thread;
-use std::sync::{Mutex, Arc};
 use rayon::prelude::*;
 
 pub trait Detector {
@@ -67,47 +65,48 @@ impl<T> Detector for Vec<T>
             spectral_flux.push(flux);
         }
 
+        spectral_flux.par_iter()
+            .enumerate()
+            .map(|(i, _flux)| {
+                let mut threshold: Vec<T> = Default::default();
+                let start = cmp::max(0, i as isize - TWIN_SIZE);
+                let end = cmp::max((spectral_flux.len() - 1) as isize, i as isize + TWIN_SIZE);
 
-        let mut threshold: Vec<T> = Default::default();
+                let mut mean: T = num::NumCast::from(0).unwrap();
 
-        for (i, _val) in spectral_flux.iter().enumerate() {
-            let start = cmp::max(0, i as isize - TWIN_SIZE);
-            let end = cmp::max((spectral_flux.len() - 1) as isize, i as isize + TWIN_SIZE);
-
-            let mut mean: T = num::NumCast::from(0).unwrap();
-
-            for j in start..end {
-                if let Some(val) = spectral_flux.get(j as usize) {
-                    mean += *val;
+                for j in start..end {
+                    if let Some(val) = spectral_flux.get(j as usize) {
+                        mean += *val;
+                    }
                 }
-            }
 
-            mean /= num::NumCast::from(end - start).unwrap();
+                mean /= num::NumCast::from(end - start).unwrap();
 
-            for _i in 0..513 {
-                threshold.push(mean * num::NumCast::from(MULTIPLIER).unwrap())
-            }
-        }
+                for _i in 0..513 {
+                    threshold.push(mean * num::NumCast::from(MULTIPLIER).unwrap())
+                }
 
-        threshold
+                threshold
+            })
+            .flatten()
+            .collect()
     }
 
     fn beats(&self) -> Self {
         let fft = self.to_owned();
         let peak = fft.peak();
-        let mut res: Self = Default::default();
 
-        for i in 0..fft.len() {
-            let val = *fft.get(i).unwrap();
-            let diff = val - *peak.get(i).unwrap();
+        fft.par_iter()
+            .enumerate()
+            .map(|(i, val)| {
+                let diff = *val - *peak.get(i).unwrap();
 
-            if diff > num::NumCast::from(0.).unwrap() {
-                res.push(*peak.get(i).unwrap());
-            } else {
-                res.push(num::NumCast::from(0.).unwrap());
-            }
-        }
-
-        res
+                if diff > num::NumCast::from(0.).unwrap() {
+                    return *peak.get(i).unwrap();
+                } else {
+                    return num::NumCast::from(0.).unwrap();
+                }
+            })
+            .collect()
     }
 }
